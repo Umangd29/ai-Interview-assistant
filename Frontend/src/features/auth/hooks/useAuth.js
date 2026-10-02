@@ -13,6 +13,7 @@ export const useAuth = () => {
             setUser(userData.user);
         } catch (error) {
             console.error("Login failed:", error);
+            return false;
         } finally {
             setLoading(false);
         }
@@ -25,6 +26,7 @@ export const useAuth = () => {
             setUser(userData.user);
         } catch (error) {
             console.error("Registration failed:", error);
+            return false;
         } finally {
             setLoading(false);
         }
@@ -37,6 +39,7 @@ export const useAuth = () => {
             setUser(null);
         } catch (error) {
             console.error("Logout failed:", error);
+            return false;
         } finally {
             setLoading(false);
         }
@@ -49,6 +52,7 @@ export const useAuth = () => {
             setUser(userData.user);
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
+            return false;
         } finally {
             setLoading(false);
         }
@@ -62,6 +66,7 @@ export const useAuth = () => {
                     setUser(userData.user);
                 } catch (error) {
                     console.error("Failed to fetch user data:", error);
+                    return false;
                 } finally {
                     setLoading(false);
                 }
