@@ -21,35 +21,69 @@ const Register = () => {
     }   
   return (
     <main>
-        <div className="form-container">
-            <h1>Register</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input
-                    onChange={(e) => setEmail(e.target.value)} 
-                    type="email" id="email" name="email" required />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="username">Username</label>
-                    <input
-                    onChange={(e) => setUsername(e.target.value)}
-                    type="text" id="username" name="username" required />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                    onChange={(e) => setPassword(e.target.value)}
-                    type="password" id="password" name="password" required />
-                </div>
-                <button className="button primary-button" type="submit">Register</button>
-            </form>
-
-            <p>Already have an account? <Link to="/login">Login</Link></p>
-
+      <div className="form-container">
+        <div className="form-header">
+          <div className="form-logo">&hearts;</div>
+          <span className="form-eyebrow">GET STARTED</span>
+          <h1>Create Account</h1>
+          <p>Join us and start building your interview strategy.</p>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              autoComplete="email"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              onChange={(e) => setUsername(e.target.value)}
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Choose a username"
+              autoComplete="username"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              autoComplete="new-password"
+              required
+            />
+          </div>
+
+          <button
+            className="button primary-button"
+            type="submit"
+          >
+            Create Account
+            <span className="button-arrow">→</span>
+          </button>
+        </form>
+
+        <p className="form-footer">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </main>
-  )
+  );
 }
 
 export default Register
