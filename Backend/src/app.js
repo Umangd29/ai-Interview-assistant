@@ -19,6 +19,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check route
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "AI Interview Assistant API(Backend) is running"
+    });
+});
+
 // requiring all the routes here
 const authRoute = require("./routes/auth.route");
 const interviewRouter = require("./routes/interview.route");
