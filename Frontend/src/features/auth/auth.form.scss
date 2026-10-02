@@ -1,0 +1,31 @@
+main {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+
+  .form-container {
+    min-width: 350px;
+    padding: 2rem;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(179, 154, 154, 0.1);
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #f3c8c8;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+}
