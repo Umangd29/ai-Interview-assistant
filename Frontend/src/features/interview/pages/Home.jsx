@@ -1,29 +1,81 @@
-import React, { useState, useRef } from 'react';
-import "../style/home.scss";
+
+import React, { useState, useRef, useEffect } from 'react';
+import '../style/home.scss';
 import { useInterview } from '../hooks/useInterview.js';
 import { useNavigate } from 'react-router';
 
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+
 const Home = () => {
     const { loading, generateReport, reports = [] } = useInterview();
-
-    const [jobDescription, setJobDescription] = useState("");
-    const [selfDescription, setSelfDescription] = useState("");
-    const [error, setError] = useState("");
+    const [jobDescription, setJobDescription] = useState('');
+    const [selfDescription, setSelfDescription] = useState('');
+    const [resumeFile, setResumeFile] = useState(null);
+    const [pdfUrl, setPdfUrl] = useState('');
+    const [error, setError] = useState('');
 
     const resumeInputRef = useRef(null);
     const navigate = useNavigate();
 
-    const handleGenerateReport = async () => {
-        if (loading) return;
-
-        const resumeFile = resumeInputRef.current?.files?.[0];
-
-        if (!jobDescription.trim()) {
-            setError("Please enter a job description.");
+    // Create and clean up the PDF preview URL
+    useEffect(() => {
+        if (!resumeFile) {
+            setPdfUrl('');
             return;
         }
 
-        setError("");
+        const url = URL.createObjectURL(resumeFile);
+        setPdfUrl(url);
+
+        return () => URL.revokeObjectURL(url);
+    }, [resumeFile]);
+
+    // Validate and select a PDF
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setError('');
+
+        const isPdf =
+            file.type === 'application/pdf' ||
+            file.name.toLowerCase().endsWith('.pdf');
+
+        if (!isPdf) {
+            setResumeFile(null);
+            e.target.value = '';
+            setError('Please upload a PDF file only.');
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            setResumeFile(null);
+            e.target.value = '';
+            setError('PDF size must not exceed 3 MB.');
+            return;
+        }
+
+        setResumeFile(file);
+    };
+
+    // Remove selected PDF
+    const handleRemoveFile = () => {
+        setResumeFile(null);
+        if (resumeInputRef.current) {
+            resumeInputRef.current.value = '';
+        }
+    };
+
+    // Generate interview report
+    const handleGenerateReport = async () => {
+        if (loading) return;
+
+        if (!jobDescription.trim()) {
+            setError('Please enter a job description.');
+            return;
+        }
+
+        setError('');
 
         try {
             const data = await generateReport({
@@ -33,16 +85,18 @@ const Home = () => {
             });
 
             if (!data?._id) {
-                setError("Unable to generate your interview strategy. Please try again.");
+                setError(
+                    'Unable to generate your interview strategy. Please try again.'
+                );
                 return;
             }
 
             navigate(`/interview/${data._id}`);
         } catch (err) {
-            console.error("Interview generation error:", err);
+            console.error('Interview generation error:', err);
             setError(
                 err?.response?.data?.message ||
-                "Something went wrong while generating your interview. Please try again."
+                'Something went wrong while generating your interview. Please try again.'
             );
         }
     };
@@ -50,7 +104,7 @@ const Home = () => {
     if (loading) {
         return (
             <main className="loading-screen">
-                <h1>Loading your interview plan...</h1>
+                <h1>Generating your interview plan...</h1>
             </main>
         );
     }
@@ -63,18 +117,18 @@ const Home = () => {
                     AI-POWERED CAREER PREPARATION
                 </span>
                 <h1>
-                    Create Your Custom <span className="highlight">Interview Plan</span>
+                    Create Your Custom{' '}
+                    <span className="highlight">Interview Plan</span>
                 </h1>
                 <p>
-                    Let our AI analyze the job requirements and your unique profile
-                    to build a personalized interview strategy.
+                    Let our AI analyze the job requirements and your unique
+                    profile to build a personalized interview strategy.
                 </p>
             </header>
 
             {/* Main Card */}
             <div className="interview-card">
                 <div className="interview-card__body">
-
                     {/* Left Panel - Job Description */}
                     <div className="panel panel--left">
                         <div className="panel__header">
@@ -90,26 +144,37 @@ const Home = () => {
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                 >
-                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                    <rect
+                                        x="2"
+                                        y="7"
+                                        width="20"
+                                        height="14"
+                                        rx="2"
+                                        ry="2"
+                                    />
                                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                                 </svg>
                             </span>
+
                             <div className="panel__title">
                                 <h2>Target Job Description</h2>
                                 <p>Tell us about the role you're applying for.</p>
                             </div>
-                            <span className="badge badge--required">Required</span>
+
+                            <span className="badge badge--required">
+                                Required
+                            </span>
                         </div>
 
                         <textarea
                             value={jobDescription}
                             onChange={(e) => {
                                 setJobDescription(e.target.value);
-                                if (error) setError("");
+                                if (error) setError('');
                             }}
                             className="panel__textarea"
                             placeholder={`Paste the full job description here...
-e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and system design...`}
+e.g. Frontend Engineer requires proficiency in React, JavaScript, and system design...`}
                             maxLength={5000}
                         />
 
@@ -138,11 +203,12 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                                 <circle cx="12" cy="12" r="10" />
                                 <path d="M12 16v-4M12 8h.01" />
                             </svg>
-                            Include responsibilities, skills, and qualifications for better results.
+                            Include responsibilities, skills, and qualifications
+                            for better results.
                         </div>
                     </div>
 
-                    {/* Vertical Divider */}
+                    {/* Divider */}
                     <div className="panel-divider" />
 
                     {/* Right Panel - Profile */}
@@ -164,6 +230,7 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                                     <circle cx="12" cy="7" r="4" />
                                 </svg>
                             </span>
+
                             <div className="panel__title">
                                 <h2>Your Profile</h2>
                                 <p>Optionally share your experience.</p>
@@ -172,44 +239,91 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
 
                         {/* Upload Resume */}
                         <div className="upload-section">
-                            <label className="section-label">
+                            <label className="section-label" htmlFor="resume">
                                 Upload Resume
-                                <span className="badge badge--best">Optional</span>
+                                <span className="badge badge--best">
+                                    Optional
+                                </span>
                             </label>
 
-                            <label className="dropzone" htmlFor="resume">
-                                <span className="dropzone__icon">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="30"
-                                        height="30"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.7"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="16 16 12 12 8 16" />
-                                        <line x1="12" y1="12" x2="12" y2="21" />
-                                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26 A8 8 0 1 0 3 16.3" />
-                                    </svg>
-                                </span>
-                                <p className="dropzone__title">
-                                    Click to upload or drag &amp; drop
-                                </p>
-                                <p className="dropzone__subtitle">
-                                    PDF or DOCX (Max 5MB)
-                                </p>
-                                <input
-                                    ref={resumeInputRef}
-                                    hidden
-                                    type="file"
-                                    id="resume"
-                                    name="resume"
-                                    accept=".pdf,.docx"
-                                />
-                            </label>
+                            {!resumeFile && (
+                                <label
+                                    className="dropzone"
+                                    htmlFor="resume"
+                                >
+                                    <span className="dropzone__icon">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="30"
+                                            height="30"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.7"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <polyline points="16 16 12 12 8 16" />
+                                            <line
+                                                x1="12"
+                                                y1="12"
+                                                x2="12"
+                                                y2="21"
+                                            />
+                                            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26 A8 8 0 1 0 3 16.3" />
+                                        </svg>
+                                    </span>
+
+                                    <p className="dropzone__title">
+                                        Click to upload
+                                    </p>
+                                    <p className="dropzone__subtitle">
+                                        PDF only (Max 3 MB)
+                                    </p>
+                                </label>
+                            )}
+
+                            <input
+                                ref={resumeInputRef}
+                                hidden
+                                type="file"
+                                id="resume"
+                                name="resume"
+                                accept="application/pdf,.pdf"
+                                onChange={handleFileChange}
+                            />
+
+                            {/* Selected PDF Details */}
+                            {resumeFile && (
+                                <div className="pdf-preview">
+                                    <div className="pdf-preview__header">
+                                        <div>
+                                            <p className="pdf-preview__name">
+                                                {resumeFile.name}
+                                            </p>
+                                            <p className="pdf-preview__size">
+                                                {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="pdf-preview__remove"
+                                            onClick={handleRemoveFile}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    {pdfUrl && (
+                                        <iframe
+                                            className="pdf-preview__frame"
+                                            src={pdfUrl}
+                                            title="Resume PDF Preview"
+                                        />
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* OR Divider */}
@@ -219,13 +333,21 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
 
                         {/* Quick Self-Description */}
                         <div className="self-description">
-                            <label className="section-label" htmlFor="selfDescription">
+                            <label
+                                className="section-label"
+                                htmlFor="selfDescription"
+                            >
                                 Quick Self-Description
-                                <span className="badge badge--best">Optional</span>
+                                <span className="badge badge--best">
+                                    Optional
+                                </span>
                             </label>
+
                             <textarea
                                 value={selfDescription}
-                                onChange={(e) => setSelfDescription(e.target.value)}
+                                onChange={(e) =>
+                                    setSelfDescription(e.target.value)
+                                }
                                 id="selfDescription"
                                 name="selfDescription"
                                 className="panel__textarea panel__textarea--short"
@@ -298,7 +420,11 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                         >
                             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                         </svg>
-                        {loading ? "Generating Interview..." : "Generate My Interview Strategy"}
+
+                        {loading
+                            ? 'Generating Interview...'
+                            : 'Generate My Interview Strategy'}
+
                         {!loading && (
                             <span className="generate-btn__arrow">→</span>
                         )}
@@ -311,10 +437,15 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                 <section className="recent-reports">
                     <div className="recent-reports__header">
                         <div>
-                            <span className="page-eyebrow">YOUR PROGRESS</span>
+                            <span className="page-eyebrow">
+                                YOUR PROGRESS
+                            </span>
                             <h2>My Recent Interview Plans</h2>
-                            <p>Continue working on your interview preparation.</p>
+                            <p>
+                                Continue working on your interview preparation.
+                            </p>
                         </div>
+
                         <span className="reports-count">
                             {reports.length} Plans
                         </span>
@@ -325,7 +456,9 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                             <li
                                 key={report._id}
                                 className="report-item"
-                                onClick={() => navigate(`/interview/${report._id}`)}
+                                onClick={() =>
+                                    navigate(`/interview/${report._id}`)
+                                }
                             >
                                 <div className="report-item__icon">
                                     <svg
@@ -339,16 +472,26 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     >
-                                        <rect x="4" y="3" width="16" height="18" rx="2" />
+                                        <rect
+                                            x="4"
+                                            y="3"
+                                            width="16"
+                                            height="18"
+                                            rx="2"
+                                        />
                                         <path d="M8 8h8M8 12h8M8 16h4" />
                                     </svg>
                                 </div>
 
                                 <div className="report-item__content">
-                                    <h3>{report.title || "Untitled Position"}</h3>
+                                    <h3>
+                                        {report.title || 'Untitled Position'}
+                                    </h3>
                                     <p className="report-meta">
-                                        Generated on{" "}
-                                        {new Date(report.createdAt).toLocaleDateString()}
+                                        Generated on{' '}
+                                        {new Date(
+                                            report.createdAt
+                                        ).toLocaleDateString()}
                                     </p>
                                 </div>
 
@@ -356,16 +499,18 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
                                     <p
                                         className={`match-score ${
                                             report.matchScore >= 80
-                                                ? "score--high"
+                                                ? 'score--high'
                                                 : report.matchScore >= 60
-                                                ? "score--mid"
-                                                : "score--low"
+                                                ? 'score--mid'
+                                                : 'score--low'
                                         }`}
                                     >
                                         {report.matchScore}%
                                         <span>Match</span>
                                     </p>
-                                    <span className="report-item__arrow">→</span>
+                                    <span className="report-item__arrow">
+                                        →
+                                    </span>
                                 </div>
                             </li>
                         ))}
@@ -375,7 +520,9 @@ e.g. Senior Frontend Engineer requires proficiency in React, TypeScript, and sys
 
             {/* Page Footer */}
             <footer className="page-footer">
-                <span>© {new Date().getFullYear()} Interview AI</span>
+                <span>
+                    © {new Date().getFullYear()} Interview AI
+                </span>
                 <div className="page-footer__links">
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>
