@@ -11,12 +11,26 @@ const Home = () => {
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
-
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
-    }
+        const resumeFile = resumeInputRef.current?.files?.[0];
+
+        if (!jobDescription.trim()) {
+            setError("Please enter a job description.");
+            return;
+        }
+
+        setError("");
+
+        const data = await generateReport({
+            jobDescription,
+            selfDescription,
+            resumeFile
+        });
+
+        if (!data?._id) return;
+
+        navigate(`/interview/${data._id}`);
+    };
 
     if (loading) {
         return (
