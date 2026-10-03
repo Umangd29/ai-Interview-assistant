@@ -11,6 +11,7 @@ export const useAuth = () => {
         try {
             const userData = await loginUser({email, password});
             setUser(userData.user);
+            return true;
         } catch (error) {
             console.error("Login failed:", error);
             return false;
@@ -24,6 +25,7 @@ export const useAuth = () => {
         try {
             const userData = await registerUser({username, email, password});
             setUser(userData.user);
+            return true;
         } catch (error) {
             console.error("Registration failed:", error);
             return false;
@@ -37,6 +39,7 @@ export const useAuth = () => {
         try {
             await logoutUser();
             setUser(null);
+            return true;
         } catch (error) {
             console.error("Logout failed:", error);
             return false;
@@ -50,6 +53,7 @@ export const useAuth = () => {
         try {
             const userData = await getMe();
             setUser(userData.user);
+            return true;
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
             return false;
@@ -58,22 +62,22 @@ export const useAuth = () => {
         }
     };
 
-    useEffect(() => {
-            const fetchUser = async () => {
-                setLoading(true);
-                try {
-                    const userData = await getMe();
-                    setUser(userData.user);
-                } catch (error) {
-                    console.error("Failed to fetch user data:", error);
-                    return false;
-                } finally {
-                    setLoading(false);
-                }
-            };
+    // useEffect(() => {
+    //         const fetchUser = async () => {
+    //             setLoading(true);
+    //             try {
+    //                 const userData = await getMe();
+    //                 setUser(userData.user);
+    //             } catch (error) {
+    //                 console.error("Failed to fetch user data:", error);
+    //                 return false;
+    //             } finally {
+    //                 setLoading(false);
+    //             }
+    //         };
     
-            fetchUser();
-        }, []);
+    //         fetchUser();
+    //     }, []);
 
     return { user, handleLogin, handleRegister, handleLogout, fetchUserProfile, loading, setLoading };  
 }

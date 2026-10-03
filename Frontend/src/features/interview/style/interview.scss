@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // ── Shared Variables (mirrors home.scss theme) ────────────────────────────────
 $bg-page: #0d1117;
 $bg-card: #161b22;
@@ -31,7 +33,7 @@ $severity-low: #3fb950;
     box-sizing: border-box;
 }
 
-// ── 3-Column Layout ───────────────────────────────────────────────────────────
+// ── 3-Column Layout ──────────────────────────────────────────────────────────
 .interview-layout {
     display: flex;
     width: 100%;
@@ -49,7 +51,7 @@ $severity-low: #3fb950;
     flex-shrink: 0;
 }
 
-// ── Left Nav ─────────────────────────────────────────────────────────────────
+// ── Left Nav ──────────────────────────────────────────────────────────────────
 .interview-nav {
     width: 220px;
     flex-shrink: 0;
@@ -58,9 +60,6 @@ $severity-low: #3fb950;
     flex-direction: column;
     justify-content: space-between;
     gap: 0.25rem;
-
-
-
 
     &__label {
         font-size: 0.7rem;
@@ -120,13 +119,6 @@ $severity-low: #3fb950;
     padding-bottom: 5rem;
     align-items: flex-start;
 
-
-
-
-
-
-
-
     section {
         min-height: 100%;
     }
@@ -172,7 +164,7 @@ $severity-low: #3fb950;
     transition: border-color 0.2s;
 
     &:hover {
-        border-color: lighten($border-color, 8%);
+        border-color: color.adjust($border-color, $lightness: 8%);
     }
 
     &__header {
@@ -234,7 +226,7 @@ $severity-low: #3fb950;
         p {
             margin: 0;
             font-size: 0.835rem;
-            color: lighten($text-muted, 15%);
+            color: color.adjust($text-muted, $lightness: 15%);
             line-height: 1.6;
         }
     }
@@ -277,7 +269,11 @@ $severity-low: #3fb950;
         top: 0;
         bottom: 0;
         width: 2px;
-        background: linear-gradient(to bottom, $accent, rgba($accent, 0.1));
+        background: linear-gradient(
+            to bottom,
+            $accent,
+            rgba($accent, 0.1)
+        );
         border-radius: 1px;
     }
 }
@@ -338,7 +334,7 @@ $severity-low: #3fb950;
             align-items: flex-start;
             gap: 0.5rem;
             font-size: 0.845rem;
-            color: lighten($text-muted, 12%);
+            color: color.adjust($text-muted, $lightness: 12%);
             line-height: 1.5;
         }
     }
@@ -368,7 +364,7 @@ $severity-low: #3fb950;
     background-color: $border-color;
 }
 
-// Match Score
+// ── Match Score ───────────────────────────────────────────────────────────────
 .match-score {
     display: flex;
     flex-direction: column;
@@ -429,7 +425,7 @@ $severity-low: #3fb950;
     }
 }
 
-// Skill Gaps
+// ── Skill Gaps ────────────────────────────────────────────────────────────────
 .skill-gaps {
     display: flex;
     flex-direction: column;
